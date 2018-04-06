@@ -40,9 +40,7 @@ def get_sma_data(symbol, period, days):
         day += 1
     return sma_data
 
-def main():
-    print_log("Signal analytics started...")
-    # get all stock symbols
+def get_all_stocks():
     stocks = []
     with open(NASDAQ_SYMBOL_FILE) as file:
         for line in file:
@@ -50,6 +48,41 @@ def main():
             if len(parts) < 2 or "File Creation Time" in line or "Symbol" in line:
                 continue
             stocks.append(Stock(parts[0], parts[1]))
+
+# process again the error stocks
+def get_error_stocks():
+    error_stocks = [
+        {
+            "symbol": "CMCTP",
+            "company": "CIM Commercial Trust Corporation - Series L Preferred Stock",
+        },
+        {
+            "symbol": "IMRN",
+            "company": "Immuron Limited - American Depositary Shares",
+        },
+        {
+            "symbol": "LRGE",
+            "company": "ClearBridge Large Cap Growth ESG ETF",
+        },
+        {
+            "symbol": "MPAC",
+            "company": "Matlin & Partners Acquisition Corporation - Class A Common Stock",
+        },
+        {
+            "symbol": "SGH",
+            "company": "SMART Global Holdings, Inc. - Ordinary Shares",
+        },
+    ]
+    stocks = []
+    for stock in error_stocks:
+        stocks.append(Stock(stock["symbol"], stock["company"]))
+    return stocks
+
+def main():
+    print_log("Signal analytics started...")
+    # get all stock symbols
+    # stocks = get_all_stocks()
+    stocks = get_error_stocks()
     # analytics for golden cross & silver cross
     CAL_DAYS = 30
     golden_cross_stocks = []
@@ -66,32 +99,34 @@ def main():
             sma_50 = get_sma_data(stock.symbol, 50, CAL_DAYS)
             time.sleep(1)
             sma_200 = get_sma_data(stock.symbol, 200, CAL_DAYS)
-            if len(sma_200) == 0 or len(sma_50) == 0 or len(sma_15) == 0:
+            min_len = min(len(sma_200), len(sma_50), len(sma_15))
+            if min_len == 0:
                 continue
             # check if we have cross
-            if sma_15[0].value > sma_200[0].value and sma_15[len(sma_15) - 1].value < sma_200[len(sma_15) - 1].value:
+            if sma_15[0].value > sma_200[0].value and sma_15[min_len - 1].value < sma_200[min_len - 1].value:
                 # find golden cross
                 golden_cross_stocks.append(stock)
                 print_log("Found golden cross:)")
-            if sma_50[0].value > sma_200[0].value and sma_50[len(sma_15) - 1].value < sma_200[len(sma_15) - 1].value:
+            if sma_50[0].value > sma_200[0].value and sma_50[min_len - 1].value < sma_200[min_len - 1].value:
                 # find silver cross
                 silver_cross_stocks.append(stock)
                 print_log("Found silver cross:)")
             print_log("Progress: " + str(index + 1) + "/" + str(len(stocks)))
             # sys.stdout.write("Progress: " + str(index + 1) + "/" + str(len(stocks)) + "\r")
             # sys.stdout.flush()
-        except:
+        except Exception as ex:
+            print_log("Exception process stock :" + stock.symbol + ", " + str(ex))
             stock = stocks[index]
             error_stocks.append(stock)
-            print_log("Error process stock " + stock.symbol + "!!")
     print_log("Signal analytics success!")
     print_log("Error stocks:")
     for stock in error_stocks:
         print(stock.symbol, stock.company)
-    print_log("Silver cross stocks(50 cross 200):")
+    # TODO, fix gold cross & silver cross
+    print_log("Silver cross stocks(15 cross 50):")
     for stock in silver_cross_stocks:
         print(stock.symbol, stock.company)
-    print_log("Golden cross stocks(15 cross 200):")
+    print_log("Golden cross stocks(50 cross 200):")
     for stock in golden_cross_stocks:
         print(stock.symbol, stock.company)
 
