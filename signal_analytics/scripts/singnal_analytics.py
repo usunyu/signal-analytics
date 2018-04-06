@@ -48,6 +48,7 @@ def get_all_stocks():
             if len(parts) < 2 or "File Creation Time" in line or "Symbol" in line:
                 continue
             stocks.append(Stock(parts[0], parts[1]))
+    return stocks
 
 # process again the error stocks
 def get_error_stocks():
