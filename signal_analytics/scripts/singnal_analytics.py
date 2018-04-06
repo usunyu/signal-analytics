@@ -81,8 +81,8 @@ def get_error_stocks():
 def main():
     print_log("Signal analytics started...")
     # get all stock symbols
-    # stocks = get_all_stocks()
-    stocks = get_error_stocks()
+    stocks = get_all_stocks()
+    # stocks = get_error_stocks()
     # analytics for golden cross & silver cross
     CAL_DAYS = 30
     golden_cross_stocks = []
@@ -103,26 +103,25 @@ def main():
             if min_len == 0:
                 continue
             # check if we have cross
-            if sma_15[0].value > sma_200[0].value and sma_15[min_len - 1].value < sma_200[min_len - 1].value:
+            if sma_15[0].value > sma_50[0].value and sma_15[min_len - 1].value < sma_50[min_len - 1].value:
                 # find golden cross
-                golden_cross_stocks.append(stock)
-                print_log("Found golden cross:)")
+                silver_cross_stocks.append(stock)
+                print_log("Found silver cross :)")
             if sma_50[0].value > sma_200[0].value and sma_50[min_len - 1].value < sma_200[min_len - 1].value:
                 # find silver cross
-                silver_cross_stocks.append(stock)
-                print_log("Found silver cross:)")
+                golden_cross_stocks.append(stock)
+                print_log("Found golden cross :)")
             print_log("Progress: " + str(index + 1) + "/" + str(len(stocks)))
             # sys.stdout.write("Progress: " + str(index + 1) + "/" + str(len(stocks)) + "\r")
             # sys.stdout.flush()
         except Exception as ex:
-            print_log("Exception process stock :" + stock.symbol + ", " + str(ex))
+            print_log("Exception process stock :" + stock.symbol + ", " + str(ex) + "!")
             stock = stocks[index]
             error_stocks.append(stock)
     print_log("Signal analytics success!")
     print_log("Error stocks:")
     for stock in error_stocks:
         print(stock.symbol, stock.company)
-    # TODO, fix gold cross & silver cross
     print_log("Silver cross stocks(15 cross 50):")
     for stock in silver_cross_stocks:
         print(stock.symbol, stock.company)
