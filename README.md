@@ -1,9 +1,9 @@
-# signal-analytics-server
-Signal Analytics Django Server
+# signal-analytics
+Signal Analytics Scripts
 
 ## Run Analytics Script
 ```
-$ python signal_analytics/scripts/singnal_analytics.py
+$ python singnal_analytics.py
 ```
 
 ## Result
